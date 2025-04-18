@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Search, Bell, User } from "lucide-react";
+import { Search, Bell, User, Settings } from "lucide-react";
+import { authService } from '@/services/authService';
 
 const NavBar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -21,13 +22,17 @@ const NavBar: React.FC = () => {
     window.addEventListener('scroll', handleScroll);
 
     // Check if user is logged in
-    const token = localStorage.getItem('token');
-    setIsLoggedIn(!!token);
+    setIsLoggedIn(authService.isAuthenticated());
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
+
+  const handleLogout = () => {
+    authService.logout();
+    window.location.href = '/';
+  };
 
   return (
     <nav
@@ -64,6 +69,14 @@ const NavBar: React.FC = () => {
               <Link to="/profile">
                 <User className="h-5 w-5" />
               </Link>
+            </Button>
+            <Button variant="ghost" size="icon" asChild>
+              <Link to="/backend">
+                <Settings className="h-5 w-5" />
+              </Link>
+            </Button>
+            <Button variant="ghost" onClick={handleLogout}>
+              Logout
             </Button>
           </>
         ) : (

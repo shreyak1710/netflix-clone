@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+import { authService } from '@/services/authService';
+import { LoginRequest } from '@/types/auth';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -18,16 +20,20 @@ const Login: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // In a real app, this would be an API call to your Spring Boot backend
-      // For now, we'll simulate a successful login
-      console.log('Login attempt with:', { email, password });
+      const loginData: LoginRequest = {
+        email,
+        password
+      };
 
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await authService.login(loginData);
       
-      // Mock successful login
-      localStorage.setItem('token', 'mock-jwt-token');
-      localStorage.setItem('user', JSON.stringify({ email }));
+      // Store the token and user data
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('user', JSON.stringify({
+        id: response.id,
+        email: response.email,
+        name: response.name
+      }));
       
       toast({
         title: "Login successful",
@@ -40,7 +46,7 @@ const Login: React.FC = () => {
       toast({
         variant: "destructive",
         title: "Login failed",
-        description: "Please check your credentials and try again.",
+        description: error instanceof Error ? error.message : "Please check your credentials and try again.",
       });
     } finally {
       setIsLoading(false);
@@ -69,6 +75,8 @@ const Login: React.FC = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+              title="Please enter a valid email address"
             />
           </div>
           
@@ -80,6 +88,7 @@ const Login: React.FC = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              minLength={8}
             />
           </div>
           

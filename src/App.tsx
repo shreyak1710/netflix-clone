@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Subscription from "./pages/Subscription";
 import Browse from "./pages/Browse";
+import Backend from "./pages/Backend";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/register" element={<Register />} />
           <Route path="/subscription" element={<Subscription />} />
           <Route path="/browse" element={<Browse />} />
+          <Route path="/backend" element={<Backend />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
