@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { authService } from '@/services/authService';
+import { RegisterRequest } from '@/types/auth';
 
 const Register: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -24,26 +26,34 @@ const Register: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // In a real app, this would be an API call to your Spring Boot backend
-      // For now, we'll simulate a successful registration
-      console.log('Registration attempt with:', { email, password, name });
+      const registerData: RegisterRequest = {
+        email,
+        password,
+        name
+      };
 
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await authService.register(registerData);
+      
+      // Store the token
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('user', JSON.stringify({
+        id: response.id,
+        email: response.email,
+        name: response.name
+      }));
       
       toast({
         title: "Registration successful",
         description: "Your account has been created. Please select a subscription plan.",
       });
       
-      // Navigate to subscription page
       navigate('/subscription');
     } catch (error) {
       console.error('Registration error:', error);
       toast({
         variant: "destructive",
         title: "Registration failed",
-        description: "Please try again later.",
+        description: error instanceof Error ? error.message : "Please try again later.",
       });
     } finally {
       setIsLoading(false);
@@ -75,6 +85,8 @@ const Register: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                title="Please enter a valid email address"
               />
             </div>
             
@@ -108,6 +120,8 @@ const Register: React.FC = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                minLength={2}
+                maxLength={50}
               />
             </div>
             
@@ -119,6 +133,9 @@ const Register: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                minLength={8}
+                pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$"
+                title="Password must be at least 8 characters long and contain at least one letter and one number"
               />
             </div>
             
